@@ -2,23 +2,27 @@ import { useEffect, useCallback, useState } from "react";
 import "./App.css";
 import { useBroadcastWebSocket } from "./hooks/useBroadcastWebSocket";
 
-const SERVER_URL = `https://marinm.net/broadcast?channel=presence`;
+const SERVER_URL = `http://localhost:3001/broadcast?channel=presence`;
 
 type ServerMessage = {
+  connectionId: string;
   from: "server";
   data: {
-    connectionId: string;
+    present?: string[];
   };
 };
 
 function App() {
   const [myId, setMyId] = useState<string>("");
+  const [presentIds, setPresentIds] = useState<string[]>([]);
   const ws = useBroadcastWebSocket<object, ServerMessage>();
 
   const onMessage = useCallback((message: ServerMessage) => {
-    console.log("ServerMessage", message, message.data.connectionId);
+    setMyId(message.connectionId);
     if (message.from === "server") {
-      setMyId(message.data.connectionId);
+      if (message.data.present) {
+        setPresentIds(message.data.present);
+      }
     }
   }, []);
 
@@ -28,8 +32,12 @@ function App() {
 
   return (
     <>
-      <div>{ws.readyState === WebSocket.OPEN ? "Connected" : ""}</div>
-      {myId ? <div>as {myId}</div> : ""}
+      <div>{ws.readyState === WebSocket.OPEN ? "Connected as" : ""}</div>
+      {myId ? <div>{myId}</div> : ""}
+      <p>Present:</p>
+      {presentIds.map((id) => (
+        <div>{id}</div>
+      ))}
     </>
   );
 }
