@@ -9,9 +9,14 @@ function App() {
 
   useEffect(() => {
     ws.open(SERVER_URL);
+    ws.listen((event) => {
+      if (event.name === "message") {
+        console.log("event.message", event.message);
+      }
+    });
   }, [ws]);
 
-  return <>{ws.isOnline ? "Online" : "Offline"}</>;
+  return <>{ws.readyState}</>;
 }
 
 export default App;

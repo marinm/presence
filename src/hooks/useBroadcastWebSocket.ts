@@ -84,7 +84,7 @@ export function useBroadcastWebSocket(options: Options): BroadcastWebSocket {
         console.log("message", event);
         emit({
           name: "message",
-          message: {},
+          message: event.data,
         });
       };
 
