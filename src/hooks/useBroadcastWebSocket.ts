@@ -1,74 +1,46 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// Some of the benefits of this WebSocket wrapper:
-//   - null-safe: the wrapper is never null
-//   - lazy: can create without connecting
-//   - type-safe: send() enforces valid Message type
-//   - validation: the message listener always receives a valid message
-//   - order safety: each method checks current state before running
-
-type EventListener = (() => void) | ((data: object) => void);
-
-export type BroadcastWebSocket = {
-  isOnline: boolean;
-  readyState: null | number;
-  error: boolean;
-  open: (url: string) => void;
-  send: (data: object) => void;
-  close: () => void;
-  listen: (callback: EventListener) => void;
-};
-
-type Options = {
-  valid: (data: object) => boolean;
-};
-
-export function useBroadcastWebSocket(options: Options): BroadcastWebSocket {
+export function useBroadcastWebSocket<ClientMessage, ServerMessage>() {
   const websocketRef = useRef<null | WebSocket>(null);
   const [readyState, setReadyState] = useState<number>(WebSocket.CLOSED);
   const [isOnline, setIsOnline] = useState<boolean>(window.navigator.onLine);
   const [error, setError] = useState<boolean>(false);
-  const onMessageRef = useRef<EventListener>(() => {});
+  const onMessageRef = useRef<(message: ServerMessage) => void>(() => {});
 
   function reasonError(method: string, reason: string) {
     console.log(`ignoring ${method}() because ${reason}`);
   }
 
-  const open = useCallback(
-    (url: string) => {
-      console.log(options);
+  const open = useCallback((url: string) => {
+    if (websocketRef.current !== null) {
+      reasonError("open", "already open");
+      return;
+    }
+    websocketRef.current = new WebSocket(url);
 
-      if (websocketRef.current !== null) {
-        reasonError("open", "already open");
-        return;
-      }
-      websocketRef.current = new WebSocket(url);
+    const websocket = websocketRef.current;
 
-      const websocket = websocketRef.current;
+    websocket.onopen = () => {
+      setReadyState(websocket.readyState);
+      setError(false);
+    };
 
-      websocket.onopen = () => {
-        setReadyState(websocket.readyState);
-        setError(false);
-      };
+    websocket.onmessage = (event) => {
+      onMessageRef.current(event.data);
+    };
 
-      websocket.onmessage = (event) => {
-        onMessageRef.current(event.data);
-      };
+    websocket.onclose = () => {
+      setReadyState(websocket.readyState);
+      websocketRef.current = null;
+    };
 
-      websocket.onclose = () => {
-        setReadyState(websocket.readyState);
-        websocketRef.current = null;
-      };
+    websocket.onerror = (err) => {
+      console.error(err);
+      setError(true);
+    };
+  }, []);
 
-      websocket.onerror = (err) => {
-        console.error(err);
-        setError(true);
-      };
-    },
-    [options],
-  );
-
-  const send = useCallback((message: object) => {
+  const send = useCallback((message: ClientMessage) => {
     if (websocketRef.current === null) {
       if (websocketRef.current === null) {
         reasonError("send", "closed");
@@ -124,7 +96,7 @@ export function useBroadcastWebSocket(options: Options): BroadcastWebSocket {
     };
   }, [close]);
 
-  function listen(callback: EventListener) {
+  function onMessage(callback: (message: ServerMessage) => void) {
     onMessageRef.current = callback;
   }
 
@@ -135,6 +107,6 @@ export function useBroadcastWebSocket(options: Options): BroadcastWebSocket {
     open,
     send,
     close,
-    listen,
+    onMessage,
   };
 }
