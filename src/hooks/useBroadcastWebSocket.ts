@@ -26,7 +26,8 @@ export function useBroadcastWebSocket<ClientMessage, ServerMessage>() {
     };
 
     websocket.onmessage = (event) => {
-      onMessageRef.current(event.data);
+      const message = JSON.parse(event.data);
+      onMessageRef.current(message);
     };
 
     websocket.onclose = () => {
