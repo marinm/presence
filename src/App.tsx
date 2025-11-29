@@ -9,14 +9,10 @@ function App() {
 
   useEffect(() => {
     ws.open(SERVER_URL);
-    ws.listen((event) => {
-      if (event.name === "message") {
-        console.log("event.message", event.message);
-      }
-    });
+    ws.listen((data) => console.log("message", data));
   }, [ws]);
 
-  return <>{ws.readyState}</>;
+  return <>{ws.readyState === WebSocket.OPEN ? "Connected" : ""}</>;
 }
 
 export default App;
