@@ -30,11 +30,19 @@ function App() {
 
   useEffect(() => ws.open(SERVER_URL), [ws]);
 
+  function onBubbleClick(id: string) {
+    console.log(`${myId} clicked on ${id}`);
+  }
+
   return (
     <>
       <div className="bubble-list">
         {presentIds.map((id) => (
-          <div key={id} className={`bubble ${id === myId ? "self" : ""}`}></div>
+          <div
+            key={id}
+            className={`bubble ${id === myId ? "self" : ""}`}
+            onClick={() => onBubbleClick(id)}
+          ></div>
         ))}
       </div>
     </>

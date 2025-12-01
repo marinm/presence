@@ -18,6 +18,11 @@
   height: 5em;
   border-radius: 50%;
   border: 2px solid black;
+  cursor: pointer;
+
+  &:hover {
+    outline: 2px solid silver;
+  }
 }
 
 .self {
