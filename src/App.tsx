@@ -32,7 +32,14 @@ function App() {
   useEffect(() => ws.open(SERVER_URL), [ws]);
 
   function onBubbleClick(id: string) {
+    if (id === myId) {
+      return;
+    }
     console.log(`${myId} clicked on ${id}`);
+    ws.send({
+      name: "hit",
+      target: id,
+    });
   }
 
   return (
