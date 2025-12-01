@@ -36,7 +36,7 @@ function App() {
       {myId ? <div>{myId}</div> : ""}
       <p>Present:</p>
       {presentIds.map((id) => (
-        <div>{id}</div>
+        <div key={id}>{id}</div>
       ))}
     </>
   );
