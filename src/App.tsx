@@ -1,8 +1,9 @@
 import { useEffect, useCallback, useState } from "react";
 import "./App.css";
 import { useBroadcastWebSocket } from "./hooks/useBroadcastWebSocket";
+import { env } from "./env";
 
-const SERVER_URL = `http://localhost:3001/broadcast?channel=presence`;
+const SERVER_URL = `${env.VITE_SERVER_PATH}?channel=${env.VITE_CHANNEL}`;
 
 type ServerMessage = {
   connectionId: string;
