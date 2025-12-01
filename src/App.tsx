@@ -32,12 +32,11 @@ function App() {
 
   return (
     <>
-      <div>{ws.readyState === WebSocket.OPEN ? "Connected as" : ""}</div>
-      {myId ? <div>{myId}</div> : ""}
-      <p>Present:</p>
-      {presentIds.map((id) => (
-        <div key={id}>{id}</div>
-      ))}
+      <div className="bubble-list">
+        {presentIds.map((id) => (
+          <div key={id} className={`bubble ${id === myId ? "self" : ""}`}></div>
+        ))}
+      </div>
     </>
   );
 }
